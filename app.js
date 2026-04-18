@@ -472,7 +472,6 @@ function calculateSalary() {
   const month = parseInt(document.getElementById('sal-month').value);
   const year = parseInt(document.getElementById('sal-year').value);
   const leaveWage = Number(document.getElementById('sal-leave-wage').value) || 0;
-  const da = Number(document.getElementById('sal-da').value) || 0;
   const advance = Number(document.getElementById('sal-advance').value) || 0;
 
   const resultEl = document.getElementById('salary-result');
@@ -490,6 +489,10 @@ function calculateSalary() {
   const counts = getAttendanceCounts(empId, month, year);
   const daysWorked = counts.present;
   const dailyWage = Number(emp.dailyWage);
+  const da = daysWorked * 17;
+
+  // Update read-only DA input in UI
+  document.getElementById('sal-da').value = da;
 
   // Salary Calculation
   const basicSalary = dailyWage * daysWorked;
@@ -523,7 +526,6 @@ function downloadSalarySlip() {
   const month = parseInt(document.getElementById('sal-month').value);
   const year = parseInt(document.getElementById('sal-year').value);
   const leaveWage = Number(document.getElementById('sal-leave-wage').value) || 0;
-  const da = Number(document.getElementById('sal-da').value) || 0;
   const advance = Number(document.getElementById('sal-advance').value) || 0;
 
   if (!empId) return;
@@ -534,6 +536,8 @@ function downloadSalarySlip() {
   const counts = getAttendanceCounts(empId, month, year);
   const daysWorked = counts.present;
   const dailyWage = Number(emp.dailyWage);
+  const da = daysWorked * 17;
+
   const basicSalary = dailyWage * daysWorked;
   const grossSalary = basicSalary + leaveWage;
   const esiApplicable = emp.esi !== false;
