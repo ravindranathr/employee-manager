@@ -305,9 +305,14 @@ function saveEmployee(event) {
 function editEmployee(id) { openEmployeeModal(id); }
 
 function deleteEmployee(id) {
+  if (!id) return;
   const emp = state.employees.find(e => e.id === id);
-  if (!emp) return;
-  if (!confirm(`Delete "${emp.name}"? This will also remove their attendance data.`)) return;
+  if (!emp) {
+    console.error('Employee not found for ID:', id);
+    return;
+  }
+  
+  if (!window.confirm(`Delete "${emp.name}"?\n\nThis will permanently remove their attendance and salary records.`)) return;
 
   state.employees = state.employees.filter(e => e.id !== id);
 
@@ -319,7 +324,7 @@ function deleteEmployee(id) {
   saveState();
   renderEmployees();
   populateEmployeeSelects();
-  showToast('Employee deleted');
+  showToast('Employee deleted successfully');
 }
 
 // ---- Populate Selects ----
@@ -730,6 +735,50 @@ function downloadSalarySlip() {
   const filename = `Salary_Slip_${emp.name.replace(/\s+/g, '_')}_${MONTHS[month]}_${year}.pdf`;
   doc.save(filename);
   showToast('Salary slip downloaded!');
+}
+
+// ---- Settings & Security ----
+function openSettingsModal() {
+  document.getElementById('passcode-form').reset();
+  document.getElementById('settings-modal').classList.add('active');
+}
+
+function closeSettingsModal(event) {
+  if (event && event.target !== event.currentTarget) return;
+  document.getElementById('settings-modal').classList.remove('active');
+}
+
+async function handlePasscodeChange(event) {
+  event.preventDefault();
+  const current = document.getElementById('current-passcode').value;
+  const newPass = document.getElementById('new-passcode').value;
+  const confirmPass = document.getElementById('confirm-passcode').value;
+
+  if (newPass.length < 4) {
+    showToast('New passcode must be at least 4 digits');
+    return;
+  }
+
+  if (newPass !== confirmPass) {
+    showToast('New passcodes do not match');
+    return;
+  }
+
+  // Verify current passcode
+  const currentHash = await hashPasscode(current);
+  const storedHash = localStorage.getItem(AUTH_KEY);
+
+  if (currentHash !== storedHash) {
+    showToast('Current passcode is incorrect');
+    return;
+  }
+
+  // Save new passcode
+  const newHash = await hashPasscode(newPass);
+  localStorage.setItem(AUTH_KEY, newHash);
+  
+  showToast('Passcode updated successfully!');
+  closeSettingsModal();
 }
 
 // ---- HTML Escape ----
