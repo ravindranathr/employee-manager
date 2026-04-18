@@ -202,6 +202,14 @@
             <label for="sal-leave-wage">Leave Wage (₹)</label>
             <input type="number" id="sal-leave-wage" value="0" min="0" step="1" oninput="calculateSalary()" />
           </div>
+          <div class="control-group">
+            <label for="sal-da">DA (Reference Only)</label>
+            <input type="number" id="sal-da" value="0" min="0" step="1" oninput="calculateSalary()" />
+          </div>
+          <div class="control-group">
+            <label for="sal-advance">Advance Deduction (₹)</label>
+            <input type="number" id="sal-advance" value="0" min="0" step="1" oninput="calculateSalary()" />
+          </div>
         </div>
         <div id="salary-result" class="salary-result" style="display:none;">
           <div class="salary-card">
@@ -228,6 +236,10 @@
                   <span>Leave Wage</span>
                   <span id="sal-leave-display" class="amount-green">₹0</span>
                 </div>
+                <div class="salary-row">
+                  <span>DA (Not added)</span>
+                  <span id="sal-da-display" class="amount-green">₹0</span>
+                </div>
                 <div class="salary-row total-row">
                   <span>Gross Salary</span>
                   <span id="sal-gross" class="amount-green">₹0</span>
@@ -238,6 +250,10 @@
                 <div class="salary-row">
                   <span>ESI (0.75%)</span>
                   <span id="sal-esi" class="amount-red">- ₹0</span>
+                </div>
+                <div class="salary-row">
+                  <span>Advance</span>
+                  <span id="sal-advance-display" class="amount-red">- ₹0</span>
                 </div>
                 <div class="salary-row total-row">
                   <span>Total Deductions</span>
@@ -279,7 +295,7 @@
         <span>Attendance</span>
       </button>
       <button class="nav-btn" data-view="salary" onclick="switchView('salary')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12M6 8h12M14.5 21L6 13h4c6 0 6-10-1-10"/></svg>
         <span>Salary</span>
       </button>
     </nav>

@@ -472,6 +472,8 @@ function calculateSalary() {
   const month = parseInt(document.getElementById('sal-month').value);
   const year = parseInt(document.getElementById('sal-year').value);
   const leaveWage = Number(document.getElementById('sal-leave-wage').value) || 0;
+  const da = Number(document.getElementById('sal-da').value) || 0;
+  const advance = Number(document.getElementById('sal-advance').value) || 0;
 
   const resultEl = document.getElementById('salary-result');
   const emptyEl = document.getElementById('salary-empty');
@@ -494,7 +496,8 @@ function calculateSalary() {
   const grossSalary = basicSalary + leaveWage;
   const esiApplicable = emp.esi !== false;
   const esi = esiApplicable ? Math.round(0.0075 * dailyWage * daysWorked * 100) / 100 : 0;
-  const netSalary = grossSalary - esi;
+  const totalDeductions = esi + advance;
+  const netSalary = grossSalary - totalDeductions;
 
   // Update UI
   document.getElementById('sal-emp-name').textContent = emp.name;
@@ -503,9 +506,11 @@ function calculateSalary() {
   document.getElementById('sal-days-worked').textContent = daysWorked;
   document.getElementById('sal-basic').textContent = formatCurrency(basicSalary);
   document.getElementById('sal-leave-display').textContent = formatCurrency(leaveWage);
+  document.getElementById('sal-da-display').textContent = formatCurrency(da);
   document.getElementById('sal-gross').textContent = formatCurrency(grossSalary);
   document.getElementById('sal-esi').textContent = '- ' + formatCurrency(esi);
-  document.getElementById('sal-total-deductions').textContent = '- ' + formatCurrency(esi);
+  document.getElementById('sal-advance-display').textContent = '- ' + formatCurrency(advance);
+  document.getElementById('sal-total-deductions').textContent = '- ' + formatCurrency(totalDeductions);
   document.getElementById('sal-net').textContent = formatCurrency(netSalary);
 
   resultEl.style.display = '';
@@ -518,6 +523,8 @@ function downloadSalarySlip() {
   const month = parseInt(document.getElementById('sal-month').value);
   const year = parseInt(document.getElementById('sal-year').value);
   const leaveWage = Number(document.getElementById('sal-leave-wage').value) || 0;
+  const da = Number(document.getElementById('sal-da').value) || 0;
+  const advance = Number(document.getElementById('sal-advance').value) || 0;
 
   if (!empId) return;
 
@@ -531,7 +538,8 @@ function downloadSalarySlip() {
   const grossSalary = basicSalary + leaveWage;
   const esiApplicable = emp.esi !== false;
   const esi = esiApplicable ? Math.round(0.0075 * dailyWage * daysWorked * 100) / 100 : 0;
-  const netSalary = grossSalary - esi;
+  const totalDeductions = esi + advance;
+  const netSalary = grossSalary - totalDeductions;
 
 
   const { jsPDF } = window.jspdf;
@@ -655,6 +663,7 @@ function downloadSalarySlip() {
   doc.setFontSize(10);
   addRow('Basic Salary (Daily Wage x Days Worked)', formatCurrencyPdf(basicSalary));
   addRow('Leave Wage', formatCurrencyPdf(leaveWage));
+  addRow('DA (Reference)', formatCurrencyPdf(da));
 
   drawLine(y, [99, 102, 241]);
   y += 1;
@@ -676,10 +685,11 @@ function downloadSalarySlip() {
 
   doc.setFontSize(10);
   addRow('ESI (0.75% x Daily Wage x Days Worked)', '- ' + formatCurrencyPdf(esi));
+  addRow('Advance Deduction', '- ' + formatCurrencyPdf(advance));
 
   drawLine(y);
   y += 6;
-  addRow('Total Deductions', '- ' + formatCurrencyPdf(esi), true);
+  addRow('Total Deductions', '- ' + formatCurrencyPdf(totalDeductions), true);
   y += 2;
   drawLine(y);
   y += 8;
