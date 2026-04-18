@@ -350,7 +350,7 @@ function populateYearSelects() {
   selects.forEach(sel => {
     if (!sel) return;
     sel.innerHTML = '';
-    for (let y = currentYear - 3; y <= currentYear + 1; y++) {
+    for (let y = 2000; y <= 2035; y++) {
       const opt = document.createElement('option');
       opt.value = y;
       opt.textContent = y;
