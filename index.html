@@ -36,6 +36,10 @@
           <span>Unlock Manager</span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
+        <button type="button" id="biometric-login-btn" class="btn btn-secondary login-btn" style="display: none; margin-top: 10px;" onclick="loginBiometric()">
+          <span>Use Biometrics</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </button>
       </form>
     </div>
   </section>
@@ -370,6 +374,14 @@
             <button type="submit" class="btn btn-primary">Update Passcode</button>
           </div>
         </form>
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--border);" />
+        <div style="text-align: center; margin-bottom: 10px;">
+          <button type="button" id="register-biometric-btn" class="btn btn-secondary" onclick="registerBiometric()" style="width: 100%;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Register Biometric Login
+          </button>
+          <div id="bio-error" style="color: #ef4444; margin-top: 10px; font-size: 14px; user-select: text; word-break: break-all;"></div>
+        </div>
       </div>
     </div>
 

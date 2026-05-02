@@ -87,11 +87,17 @@ function initAuth() {
   const loginTitle = document.getElementById('login-title');
   const loginSubtitle = document.getElementById('login-subtitle');
   const loginBtnText = document.getElementById('login-btn').querySelector('span');
+  const bioBtn = document.getElementById('biometric-login-btn');
 
   if (!storedHash) {
     loginTitle.textContent = 'Set Passcode';
     loginSubtitle.textContent = 'Create a 4-6 digit passcode to secure your data';
     loginBtnText.textContent = 'Secure & Unlock';
+  } else {
+    const bioCredId = localStorage.getItem('biometricCredId');
+    if (bioCredId && window.PublicKeyCredential) {
+      bioBtn.style.display = 'flex';
+    }
   }
 
   document.getElementById('login-form').onsubmit = handleAuthSubmit;
@@ -130,6 +136,91 @@ function unlockApp() {
   state = loadState();
   refreshDashboard();
   showToast('Welcome back!');
+}
+
+// ---- Biometric Authentication ----
+async function registerBiometric() {
+  if (!window.PublicKeyCredential) {
+    showToast("Biometrics not supported on this device.");
+    return;
+  }
+  try {
+    const publicKeyCredentialCreationOptions = {
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      rp: { name: "Employee Manager" }, // Let the browser determine rp.id automatically
+      user: {
+        id: crypto.getRandomValues(new Uint8Array(16)),
+        name: "admin",
+        displayName: "Admin",
+      },
+      pubKeyCredParams: [
+        { alg: -7, type: "public-key" },    // ES256
+        { alg: -257, type: "public-key" }   // RS256 (sometimes needed for Windows Hello)
+      ],
+      authenticatorSelection: {
+        authenticatorAttachment: "platform",
+        userVerification: "required"
+      },
+      timeout: 60000,
+      attestation: "none"
+    };
+    
+    const credential = await navigator.credentials.create({
+      publicKey: publicKeyCredentialCreationOptions
+    });
+    
+    const rawId = btoa(String.fromCharCode.apply(null, new Uint8Array(credential.rawId)));
+    localStorage.setItem('biometricCredId', rawId);
+    showToast('Biometric login enabled successfully!');
+    
+    // Also show the login button now if we were logged out
+    const bioBtn = document.getElementById('biometric-login-btn');
+    if (bioBtn) bioBtn.style.display = 'flex';
+    
+    const errDiv = document.getElementById('bio-error');
+    if (errDiv) errDiv.textContent = '';
+    
+  } catch (err) {
+    console.error(err);
+    const errDiv = document.getElementById('bio-error');
+    if (errDiv) {
+      errDiv.textContent = 'Error: ' + err.message + ' (' + err.name + ')';
+    } else {
+      showToast('Registration failed: ' + err.message);
+    }
+  }
+}
+
+async function loginBiometric() {
+  const rawIdBase64 = localStorage.getItem('biometricCredId');
+  if (!rawIdBase64) {
+    showToast('No biometric credential found. Please register in Settings.');
+    return;
+  }
+  
+  try {
+    const rawId = Uint8Array.from(atob(rawIdBase64), c => c.charCodeAt(0));
+    
+    const publicKeyCredentialRequestOptions = {
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      allowCredentials: [{
+        id: rawId,
+        type: 'public-key',
+        transports: ['internal']
+      }],
+      userVerification: 'required',
+      timeout: 60000
+    };
+
+    await navigator.credentials.get({
+      publicKey: publicKeyCredentialRequestOptions
+    });
+    
+    unlockApp();
+  } catch (err) {
+    console.error(err);
+    showToast('Biometric login failed.');
+  }
 }
 
 // ---- Navigation ----
