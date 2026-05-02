@@ -194,7 +194,7 @@ async function registerBiometric() {
 async function loginBiometric() {
   const rawIdBase64 = localStorage.getItem('biometricCredId');
   if (!rawIdBase64) {
-    showToast('No biometric credential found. Please register in Settings.');
+    alert('No biometric credential found. Please log in with your passcode and register in Settings.');
     return;
   }
   
@@ -208,7 +208,7 @@ async function loginBiometric() {
         type: 'public-key',
         transports: ['internal']
       }],
-      userVerification: 'required',
+      userVerification: 'preferred',
       timeout: 60000
     };
 
@@ -219,7 +219,7 @@ async function loginBiometric() {
     unlockApp();
   } catch (err) {
     console.error(err);
-    showToast('Biometric login failed.');
+    alert('Login failed: ' + err.message + ' (' + err.name + ')');
   }
 }
 
