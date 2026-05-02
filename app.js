@@ -14,6 +14,8 @@ function defaultState() {
   return { employees: [], attendance: {} };
 }
 
+const SYNC_URL_KEY = 'empManagerSyncUrl';
+
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -34,6 +36,60 @@ function loadState() {
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  syncSaveState(); // Fire background sync
+}
+
+async function syncLoadState() {
+  const url = localStorage.getItem(SYNC_URL_KEY);
+  if (!url) return;
+  
+  showLoading(true);
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data && Array.isArray(data.employees) && typeof data.attendance === 'object') {
+      state = data;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      refreshViews();
+      showToast('Cloud data synced successfully');
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('Failed to sync from cloud');
+  } finally {
+    showLoading(false);
+  }
+}
+
+async function syncSaveState() {
+  const url = localStorage.getItem(SYNC_URL_KEY);
+  if (!url) return;
+  
+  showLoading(true);
+  try {
+    await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(state),
+      redirect: 'follow'
+    });
+  } catch (err) {
+    console.error(err);
+    showToast('Failed to save to cloud');
+  } finally {
+    showLoading(false);
+  }
+}
+
+function showLoading(show) {
+  const el = document.getElementById('loading-overlay');
+  if (el) el.style.display = show ? 'flex' : 'none';
+}
+
+function refreshViews() {
+  if (document.getElementById('view-dashboard').classList.contains('active')) refreshDashboard();
+  if (document.getElementById('view-employees').classList.contains('active')) renderEmployees();
+  if (document.getElementById('view-attendance').classList.contains('active')) { populateEmployeeSelects(); renderAttendanceCalendar(); }
+  if (document.getElementById('view-salary').classList.contains('active')) { populateEmployeeSelects(); calculateSalary(); }
 }
 
 // ---- Utilities ----
@@ -136,6 +192,9 @@ function unlockApp() {
   state = loadState();
   refreshDashboard();
   showToast('Welcome back!');
+  
+  // Try cloud sync
+  syncLoadState();
 }
 
 // ---- Biometric Authentication ----
@@ -829,8 +888,18 @@ function downloadSalarySlip() {
 }
 
 // ---- Settings & Security ----
+function saveSyncUrl() {
+  const input = document.getElementById('sync-url').value.trim();
+  localStorage.setItem(SYNC_URL_KEY, input);
+  if (input) {
+    showToast('Sync URL saved. Syncing now...');
+    syncLoadState();
+  }
+}
+
 function openSettingsModal() {
   document.getElementById('passcode-form').reset();
+  document.getElementById('sync-url').value = localStorage.getItem(SYNC_URL_KEY) || '';
   document.getElementById('settings-modal').classList.add('active');
 }
 

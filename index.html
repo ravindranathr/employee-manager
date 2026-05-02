@@ -371,9 +371,15 @@
           </div>
           <div class="form-actions">
             <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()">Cancel</button>
-            <button type="submit" class="btn btn-primary">Update Passcode</button>
+            <button type="submit" class="btn btn-primary">Save Settings</button>
           </div>
         </form>
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--border);" />
+        <div class="form-group">
+          <label for="sync-url">Google Sheets Sync URL</label>
+          <input type="url" id="sync-url" placeholder="https://script.google.com/macros/s/.../exec" onchange="saveSyncUrl()" />
+          <small style="color: var(--text-muted); font-size: 12px; display: block; margin-top: 5px;">Paste your Web App URL here to sync data across devices.</small>
+        </div>
         <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--border);" />
         <div style="text-align: center; margin-bottom: 10px;">
           <button type="button" id="register-biometric-btn" class="btn btn-secondary" onclick="registerBiometric()" style="width: 100%;">
@@ -386,6 +392,11 @@
     </div>
 
     <!-- Toast -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+      <div class="spinner"></div>
+      <p>Syncing to Cloud...</p>
+    </div>
+    
   </div>
 
   <div id="toast" class="toast"></div>
