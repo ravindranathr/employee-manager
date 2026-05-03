@@ -146,8 +146,8 @@ function initAuth() {
   const bioBtn = document.getElementById('biometric-login-btn');
 
   if (!storedHash) {
-    loginTitle.textContent = 'Set Passcode';
-    loginSubtitle.textContent = 'Create a 4-6 digit passcode to secure your data';
+    loginTitle.textContent = 'Set Password';
+    loginSubtitle.textContent = 'Create a secure password to protect your data';
     loginBtnText.textContent = 'Secure & Unlock';
   } else {
     const bioCredId = localStorage.getItem('biometricCredId');
@@ -178,7 +178,7 @@ async function handleAuthSubmit(e) {
   } else if (hash === storedHash) {
     unlockApp();
   } else {
-    showToast('Incorrect passcode');
+    showToast('Incorrect password');
     input.value = '';
     input.focus();
   }
@@ -195,6 +195,17 @@ function unlockApp() {
   
   // Try cloud sync
   syncLoadState();
+}
+
+function logoutApp() {
+  document.getElementById('login-passcode').value = '';
+  document.getElementById('app').classList.add('app-hidden');
+  document.getElementById('login-screen').classList.add('active');
+  
+  const errDiv = document.getElementById('bio-error');
+  if (errDiv) errDiv.textContent = '';
+  
+  showToast('App locked successfully');
 }
 
 // ---- Biometric Authentication ----
@@ -915,29 +926,29 @@ async function handlePasscodeChange(event) {
   const confirmPass = document.getElementById('confirm-passcode').value;
 
   if (newPass.length < 4) {
-    showToast('New passcode must be at least 4 digits');
+    showToast('New password must be at least 4 characters');
     return;
   }
 
   if (newPass !== confirmPass) {
-    showToast('New passcodes do not match');
+    showToast('New passwords do not match');
     return;
   }
 
-  // Verify current passcode
+  // Verify current password
   const currentHash = await hashPasscode(current);
   const storedHash = localStorage.getItem(AUTH_KEY);
 
   if (currentHash !== storedHash) {
-    showToast('Current passcode is incorrect');
+    showToast('Current password is incorrect');
     return;
   }
 
-  // Save new passcode
+  // Save new password
   const newHash = await hashPasscode(newPass);
   localStorage.setItem(AUTH_KEY, newHash);
   
-  showToast('Passcode updated successfully!');
+  showToast('Password updated successfully!');
   closeSettingsModal();
 }
 
